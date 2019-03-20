@@ -3,3 +3,6 @@
 Plan d'utilisation du github (voir schéma)
 
 Présentation succinte du projet à ajouter
+
+![alt text](https://raw.githubusercontent.com/etudiantdatascience/TER-reduction-dimension/Illustrations/SchemaOrganisation.png
+      
