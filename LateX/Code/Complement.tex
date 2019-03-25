@@ -1,0 +1,139 @@
+% Reunan Bellec & Malo Gillard 
+% Master 1 Data Sciences
+% Rapport TER
+
+\documentclass[12pt]{report}
+\usepackage{lmodern}  % Police pdf
+\usepackage[french]{babel} % Document en fran\c{c}ais
+\usepackage[utf8]{inputenc} % Encodage en utf8
+\usepackage[T1]{fontenc} % Typographie fran\c{c}aise
+\usepackage{textcomp}
+\usepackage[a4paper]{geometry} % Dimension de la page fran\c{c}aise
+\usepackage{amsmath, amssymb} % Plus de maths 
+\usepackage{graphicx} % Pour ins\'erer des images
+\usepackage{xcolor} % Pour la couleur
+\usepackage{hyperref} % Pour cr\'eer la navigation hypertext dans les fichiers pdf ( \`a charger apr\`es babel)
+\usepackage{tikz} % Pour faire des figures
+\usepackage{here} % Pour placer les images
+
+% Add the following required packages to your document preamble:
+\usepackage{booktabs}
+\usepackage[normalem]{ulem}
+\useunder{\uline}{\ul}{}
+
+\title{\textbf{Comparaison de méthodes de réduction de dimension pour des analyses de données biologiques}} 
+\author{Reunan Bellec \& Malo Gillard \\ Enseignant référent : David Rousseau}
+\date{\today} % Date
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\thispagestyle{empty} % Pour que la num\'erotation ne commence pas \`a cette page
+
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+
+Complément introduction des données:\\
+
+On veut analyser la germination, de la semence sèche jusqu’à la percée de la radicule. La méthode utilisée est l'imagerie automatisée sur des semences semées sur des Tables de Jacobsen (bancs de germination).
+Les essais de germination sont menés à 5°C dans un module climatique sur 2 tables de Jacobsen. Les sondes de température de régulation et surveillance des essais ont été étalonnées avant le début de l’expérimentation. Les 2 tables de Jacobsen ont été cartographiées pour la température en 5 points.
+Chaque table dispose de 4 caméras sous lesquels sont semées 600 semences par caméra par zone de 5x5 semences. Il y a 24 zones / série d’image et 25 semences par zone. Les zones et semences sont codés « ligne colonne ».
+3 semis on été réalisés en parallèle sur les 2 tables dans l’ordre des populations.
+Les images acquises pendant 21 jours ont été analysées et à partir des mesures sur images l’heure de germination a été détectée sur chaque semence ainsi que des caractéristiques complémentaires.\\
+
+
+\part{Généralités}
+
+\section{Apprentissage supervisé}
+→ L’algorithme est guidé par le chercheur pour apprendre, à partir d’exemples préalablement adaptés/catégorisés
+→ à partir de ces données, une fois l’apprentissage terminé, l’algorithme pourra réaliser des prédictions.
+
+\section{Apprentissage non-supervisé}
+→ L’algorithme est autonome, il ne connaît pas les exemples de résultats attendus en sortie
+→ Il va devoir détecter les similarités dans les données qu’il reçoit et les organiser en fonction de ces dernières
+\part{Principes des méthodes}
+
+\section{Groupe 1}
+\subsection{Principal component analysis}
+→ Réduction de variables : à partir des variables corrélées, on va chercher à obtenir des variables non corrélées (composantes principales/ axes principaux) pour éliminer l’information récurrente/redondante.\\
+→ Jeu de données créé avec une quantité d’informations décroissante contrairement à précédemment où l’information était réparti de manière uniforme\\
+→ Données n individus observés sur p variables quantitatives. L’ACP permet d’explorer les liaisons entre variables et les ressemblances entre les individus.\\
+→ Ensuite : visualisation des individus (notion de distances entre individus) et visualisation des variables (en fonction de leurs corrélations)\\
+
+\subsection{Isomap}
+
+\begin{table}[!h]
+\begin{tabular}{@{}|l|l|@{}}
+\toprule
+n\_neighbors         & nombre de voisins à considérer pour chaque point                                                                                                       \\ \midrule
+n\_components        & nombre de dimensions auquel on veut réduire notre espace de variables                                                                                  \\ \midrule
+eigen\_solver        & méthode de décomposition en éléments propres souhaitée (par défaut = 'auto',  utilise la méthode la plus adaptée)                                      \\ \midrule
+tol ; max\_iter      & dépendent du choix de eigen\_solver si == 'dense'                                                                                                      \\ \midrule
+path\_method         & méthode utilisée pour trouver le plus court chemin/distance géodésique, par exemple Dijkstra (par défaut = 'auto', utilise la méthode la plus adaptée) \\ \midrule
+neighbors\_algorithm & algorithme utilisée pour la recherche des plus proches voisins (par défaut = 'auto', utilise la méthode la plus adaptée)                               \\ \midrule
+n\_jobs              & entier utilisé pour indiquer quelle quantité de mémoire on souhaite utiliser pour faire tourner l'algorithme                                           \\ \bottomrule
+\end{tabular}
+\end{table}
+\section{Groupe 2}
+
+\section{Groupe 3}
+\subsection{Random Forest}
+→ « Feature selection »: sélection des variables (les plus pertinentes)\\
+→ Notion clé : Les arbres régularisés pénalisent les variables lorsqu’elles sont similaires aux variables déjà choisies dans les nœuds précédant.
+→ Rappel : Les arbres binaires de décision :\\
+→ Formation d’une série de nœuds de décision : à chaque nœud, une variable explicative est sélectionnée et une "question" est posée aux n individus, ce qui sépare l’échantillon en 2 sous-groupes en fonction de la réponse.\\
+→ Choix de la variable explicative pour que les individus soient les plus homogènes possibles au vu de la variable à expliquer.\\
+→ Mesure d’hétérogénéité : couramment utilisées : l’indice de diversité du Gini et l’entropie de Shannon.\\
+→ Pour chaque variable, la "question" à poser est choisie en maximisant le gain d’homogénéité.\\
+→ Le couple (variable,question)est choisit de façon à maximiser le gain d’homogénéité au noeud.\\
+Etape 2 : Élagage de l’arbre\\
+→ Un nœud devient terminal lorsque toute nouvelle séparation de l’échantillon qui lui est appliqué ne peut pas améliorer l’homogénéité déjà atteinte, on parle alors de « feuille » pour désigner ce noeud terminal. \\
+→ Un élagage est effectué afin de réduire la complexité de l’arbre et d’éviter le sur-apprentissage (utilisation du taux d’erreurs de classement sur l’échantillon de validation)\\
+→ Sélection de variables en utilisant Random Forest\\
+Les forêts aléatoires peuvent être utilisées avec une problématique de sélection de variables.\\
+→ Les forêts aléatoires fournissent deux mesures de l’importance des variables : "Mean Decrease Gini" et "Mean Decrease Accuracy"\\
+→ Plus la perturbation d’une variable aura détérioré la précision de la prédiction, plus cette variable sera jugée importante.\\
+
+Explication des paramètres:\\
+\begin{table}[!h]
+\begin{tabular}{@{}|l|l|@{}}
+\toprule
+n\_estimators       & \begin{tabular}[c]{@{}l@{}}La précision a tendance à augmenter quand le nombre d'arbres\\ 			augmente, néanmoins, le temps de calcul est de plus en plus long.\end{tabular} \\ \midrule
+max\_features       & \begin{tabular}[c]{@{}l@{}}Nombre de features à considérer pour la meilleure séparation\\ 			d'un noeud\end{tabular}                                                        \\ \midrule
+max\_depth          & profondeur maximale de l'arbre                                                                                                                                              \\ \midrule
+min\_samples\_split & Nombre minimal d'observations pour séparer un noeud                                                                                                                         \\ \midrule
+criterion           & \begin{tabular}[c]{@{}l@{}}Critère de découpe des noeuds, Gini pour la précision,\\ 			Entropy pour un gain d'information\end{tabular}                                      \\ \midrule
+random\_state       & \begin{tabular}[c]{@{}l@{}}si la méthode repose sur de l'aléatoire, fixe le générateur\\ 			pour reproduire les résultats.\end{tabular}                                     \\ \bottomrule
+\end{tabular}
+\end{table}
+\\
+
+Utilisation du « grid-search » pour le choix des paramètres\\
+
+\section{Groupe 4}
+
+\part{Outils utilisés}
+
+Paragraphe à compléter sur la séparation des jeux de données split ...
+
+\part{Réduction de dimension sur des données biologiques}
+
+\section{Expertise}
+
+
+
+\part{Comparaison des résultats}
+
+\begin{table}[!h]
+\begin{tabular}{@{}|l|l|l|@{}}
+\toprule
+Méthode       & Dimensions retenues/ importantes                                                                                                                                              & Remarque sur la méthode \\ \midrule
+PCA           & \begin{tabular}[c]{@{}l@{}}Axe 1 :\\ 			5°C TMG (j)\\ 			Aire sous la courbe\\ 			v15j-16j\\ 			\\ \\ 			\\ 			Axe 2 :\\ 			v17j-18j\\ 			v18j-19j\\ 			v16j-17j\end{tabular} &                         \\ \midrule
+Random Forest & \begin{tabular}[c]{@{}l@{}}5°C TMG (j)\\ 			Aire sous la courbe\end{tabular}                                                                                                  &                         \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}
