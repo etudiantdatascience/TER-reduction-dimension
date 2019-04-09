@@ -5,42 +5,50 @@ Created on Tue Feb 19 15:00:50 2019
 @author: Malo
 """
 
-import math
-import random
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
+import numpy as np
 
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.linear_model import LogisticRegression
 
-### Import des données expertise/nettoyage ###
 
-# Linux
-# donnees = pd.ExcelFile("/users/gillard/Downloads/Synthese donnees des semis.xlsx").parse(1)
-# Windows
-donnees = pd.ExcelFile("C:/Users/Malo/Downloads/Synthese donnees des semis.xlsx").parse(1)
-donnees=donnees.drop(index=[960,952])
-print('Pourcentage de NaN: ','\n',round(donnees.isna().sum()/960*100,1))
-donnees=donnees.drop('5°C T50 (h)',axis=1).drop('5°C T50 (j)',axis=1).drop('5°C TMG (h)',axis=1)
+def FonctionImportDonnees(chemin):
+    """
+        importe les données du fichier excel, après expertise
+    """
+    donnees=pd.ExcelFile(chemin).parse(1) #Sélectionne la première feuille
+    donnees=donnees.drop(index=[960,952]) #Supprime les lignes avec trop de NA
+    donnees=donnees.drop('5°C T50 (h)',axis=1).drop('5°C T50 (j)',axis=1).drop('5°C TMG (h)',axis=1) #Supprime les colonnes avec information identique, ou avec trop de NA
+    
+    liste=[]
+    col={}
+    j=0
+    
+    for i in range(10,16): #Expertise: création des données de croissance
+        a=donnees.columns[i]
+        b=donnees.columns[i+1]
+        liste.append(donnees[b]-donnees[a])
+        c='v'+a+'-'+b
+        col[j]=c.replace(' ','')
+        j=j+1
+    croissance=pd.DataFrame(liste).T
+    croissance=croissance.rename(col, axis='columns')
+    donnees=pd.concat([donnees,croissance],axis=1).dropna()
+    donnees.set_index('rep')
+    
+    donnees=donnees[['Bancs', 'Pop', 'Echantillon', 'rep', 'N° rep', 'camera', 'semis','zone', '5°C TMG (j)', 'Aire sous la courbe', 'v15j-16j', 'v16j-17j', 'v17j-18j','v18j-19j', 'v19j-20j', 'v20j-21j']]
+    
+    quanti=['5°C TMG (j)', 'Aire sous la courbe', 'v15j-16j', 'v16j-17j', 'v17j-18j','v18j-19j', 'v19j-20j', 'v20j-21j']
+    quali=['Bancs', 'Pop', 'N° rep', 'camera', 'semis','zone']
+    
+    return donnees,quanti,quali
 
-# On rajoute les vitesses de germination dans les variables quantitatives
-liste=[]
-col={}
-j=0
-for i in range(10,16):
-    a=donnees.columns[i]
-    b=donnees.columns[i+1]
-    liste.append(donnees[b]-donnees[a])
-    c='v'+a+'-'+b
-    col[j]=c.replace(' ','')
-    j=j+1
-croissance=pd.DataFrame(liste).T
-croissance=croissance.rename(col, axis='columns')
-donnees=pd.concat([donnees,croissance],axis=1).dropna()
-donnees = donnees.set_index('rep')
+#IMPORTATION DES DONNEES EXPERTISEES
+donnees,quanti,quali = FonctionImportDonnees("https://raw.githubusercontent.com/etudiantdatascience/TER-reduction-dimension/master/Data/semis.xlsx")
 
 ### LDA ###
 
@@ -51,17 +59,11 @@ donnees = donnees.set_index('rep')
  classes d'individus.
 """
 
-# Préparation des données
-j = 1
-labels = donnees.iloc[:, j].values.astype('str')  # labels = variables qualitatives
-features = donnees.iloc[:, 7:23].values # features = variables quantitatives
-
-
 
 """
 train_test_split :
 La fonction train_test_split va séparer aléatoirement nos données(variables quantitatives et qualitatives)
-en plusieurs set : un set de variables "entrainées" (qui forment plusieurs groupes prédéfinis selon leurs
+en plusieurs set : un set de variables quantitatives "entrainées" (qui forment plusieurs groupes prédéfinis selon leurs
 caractéristiques/valeurs), un set de variables quantitatives "test" (sur lesquelles on appliquera la LDA,
 c'est à dire que l'on va chercher à savoir à quel groupe prédéfini ces variables appartiennent, en se basant
 sur les variables "entrainées"). On fait la même chose avec nos variables qualitatives.
@@ -88,16 +90,6 @@ labels_test = données (variables qualitatives) test
 
 """
 
-features_train, features_test, labels_train, labels_test = train_test_split(features, 
-                                                                            labels, test_size=0.2, random_state=0) 
-
-# Feature scaling : on récupère des variables centrées-réduites
-sc = StandardScaler() # méthode de sklearn.preprocessing pour centrer et réduire nos données quantitatives
-features_train = sc.fit_transform(features_train) # On centre et réduit les données quantitatives entrainées
-features_test = sc.transform(features_test) # On centre et on réduit les données quantitatives test
-
-# Application de la LDA
-
 """
 On utilise la méthode LDA de la classe sklearn.discriminant_analysis :
 sklearn.discriminant_analysis.LinearDiscriminantAnalysis(solver='svd', shrinkage=None, priors=None, 
@@ -112,28 +104,52 @@ tol = seuil de tolérance pour la 'svd'
 
 """
 
-lda = LDA(n_components = 2) # Utilisation de LDA pour réduire notre espace de variables à deux dimensions
-features_train = lda.fit_transform(features_train, labels_train) # On applique LDA sur nos données quantitatives entrainées
-features_test = lda.transform(features_test) # On applique LDA sur nos données quantitatives test
+# Préparation des données
 
+features = donnees.iloc[:, 8:16] # features = variables quantitatives
+ListeQuali = ["1","4","5","6","7"]
+num_quali = 1
 
-### EXPLICATIONS A VENIR
-
-# Fitting Logistic Regression to the Training set
-classifier = LogisticRegression(random_state = 0)
-classifier.fit(features_train, labels_train)
- 
-# Predicting the Test set results
-y_pred = classifier.predict(features_test)
+for variableQuali in quali:
+    valeur = donnees[variableQuali].drop_duplicates().values
+    donnees[variableQuali] = donnees[variableQuali].replace(valeur,list(range(len(valeur))))
 
 # Représentation graphique
-plt.show()
-for i in features_test: 
-    plt.scatter(i[0],i[1])
-plt.show()
-for i in features_train: 
-    plt.scatter(i[0],i[1])
-plt.show()
+
+for j in ListeQuali:
+    k = int(j)
+    labels = donnees.iloc[:, k].values  # labels = variables qualitatives
+    features_train, features_test, labels_train, labels_test = train_test_split(features, 
+                                                                            labels, test_size=0.2, random_state=0)
+    
+    # Feature scaling : on récupère des variables centrées-réduites
+    sc = StandardScaler() # méthode de sklearn.preprocessing pour centrer et réduire nos données quantitatives
+    features_train = sc.fit_transform(features_train) # On centre et réduit les données quantitatives entrainées
+    features_test = sc.transform(features_test) # On centre et on réduit les données quantitatives test
+    
+    # Application de la LDA
+    lda = LDA(n_components = 2) # Utilisation de LDA pour réduire notre espace de variables à deux dimensions
+    features_train = lda.fit_transform(features_train, labels_train) # On applique LDA sur nos données quantitatives entrainées
+    features_test = lda.transform(features_test) # On applique LDA sur nos données quantitatives test
+    
+    # Représentation graphique
+    for groupe in range(int(min(labels_test)),int(max(labels_test)) + 1):
+        x,y = [],[]
+        for i in range(len(features_test)):
+            if int(labels_test[i]) == groupe:
+                x.append(features_test[i][0])
+                y.append(features_test[i][1])
+        plt.scatter(x,y,marker='.') 
+    plt.title("LDA, " + str(quali[num_quali]))
+    num_quali = num_quali + 1
+    plt.xlabel('LDA 1')
+    plt.ylabel('LDA 2')
+    plt.show()
+
+
+
+
+
 
 
 
