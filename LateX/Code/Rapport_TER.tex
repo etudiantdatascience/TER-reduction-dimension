@@ -47,22 +47,136 @@ Dans un premier temps, nous étudierons le principe de chaque méthode, ce qui n
 Dans un second temps, après avoir compris chacun des précédés, nous les utiliserons sur les données issues de l'expérience de germination et nous comparerons les résultats.
 
 
-\part{Principes des méthodes}
+\chapter{Principe des méthodes}
 
-\section{Groupe 1}
-
-\section{Groupe 2}
-
-\section{Groupe 3}
-
-\section{Groupe 4}
+\noindent Le schéma suivant nous résume rapidement où se situe chaque méthode. 
 
 \begin{figure}[H] 
-\centerline{\includegraphics[scale=0.9]{classification}}
+\centerline{\includegraphics[scale=0.8]{classification}}
 \end{figure}
 
 
-\part{Réduction de dimension sur des données biologiques}
+\section{Groupe 1}
+
+\subsection{PCA}
+
+PARTIE REUNAN
+
+\subsubsection{Principe}
+
+\subsubsection{Explication mathématique}
+
+\subsubsection{Utilisation du module python sklearn}
+
+\subsection{T-SNE}
+
+PARTIE REUNAN
+
+\subsubsection{Principe}
+
+\subsubsection{Explication mathématique}
+
+\subsubsection{Utilisation du module python sklearn}
+
+\subsection{ISOMAP}
+
+\subsubsection{Principe}
+
+\noindent Tout comme la méthode T-SNE, la méthode ISOMAP est une méthode de réduction de dimension non linéaire. Cependant, contrairement à la méthode PCA, l'approche utilisée ici propose de mieux approximer la structure géométrique réelle de l'ensemble de données à travers la réduction de dimension. Elle est dite non-linéaire du fait qu'elle s'adapte très bien aux structures géométriques non linéaires.\\
+
+\noindent Par exemple, supposons que notre jeu de données soit représenté en trois dimensions par une courbe en S (donc non linéaire) : \\
+
+\begin{figure}[H] 
+\centerline{\includegraphics[scale=0.9]{Exemple_Isomap_PCA1}}
+\end{figure}
+
+\noindent La méthode PCA appliquée à ce jeu de données nous donnera comme résultats (en réduisant le nombre de dimension de 1) des valeurs désorganisées, tandis que la méthode ISOMAP préservera la structure locale après avoir réalisé une projection.\\
+
+\begin{minipage}[c]{.46\linewidth}
+     \begin{center}
+             \includegraphics[scale=1.2]{Exemple_Isomap_PCA2}
+         \end{center}
+   \end{minipage} \hfill
+   \begin{minipage}[c]{.46\linewidth}
+    \begin{center}
+            \includegraphics[scale=1.2]{Exemple_Isomap_PCA3}
+        \end{center}
+ \end{minipage}
+ 
+
+\noindent La différence vient du fait que deux points peuvent être proches selon une distance euclidienne (utilisée dans le premier cas), mais très éloignés si on mesure la distance sur la \textbf{surface} définie par les points, appelée \textbf{distance géodésique} (ce que fait la méthode ISOMAP dans le deuxième cas).\\
+
+\noindent Néanmoins il faut prendre en compte le fait que nous ne connaissons pas cette surface (dans le cas où nous avons un ensemble discret de points par exemple), ce qui rend compliquée la tâche d'évaluation des distances géodésiques.\\
+Pour résoudre ce problème, la méthode ISOMAP va construire un graphe d'adjacence des points et approcher la distance géodésique en cherchant le chemin le plus court à travers ce graphe.
+
+\subsubsection{Explication mathématique}
+
+\noindent L'algorithme va se dérouler en 3 étapes.\\
+
+\noindent \underline{\'Etape 1} : \textit{construction du graphe d'adjacence}\\ \\
+Considérons que les données sont représentées par un ensemble $X$ de dimension $d$.\\
+Pour construire le graphe d'adjacence, nous pouvons utiliser deux méthodes : pour chaque point $x_{i}$ de $X$, soit chercher les $k$ plus proches voisins $x_{1},...,x_{k}$ de $x_{i}$, soit,  utiliser la distance euclidienne pour trouver l'ensemble des points $x_{j}$ situés dans un certain rayon $r$ (en effet, pour des poins voisins, la distance euclidienne fournit une approximation juste de la distance géodésique).\\
+Nous représentons ensuite les relations de voisinage par un graphe $G$ : les noeuds sont les points $x_{i}$, et le poids de l'arête qui relie $x_{i}$ à un point de son voisinage correspond à la distance euclidienne entre ces deux points (par défaut le poids de l'arête qui relie deux points ne faisant pas partie du même voisinage est fixé à $\infty$).\\
+Nous supposerons au préalable que notre structure géométrique est entièrement connectée, c'est-à-dire qu'il n'y a pas de groupes de points isolés.\\
+
+\begin{figure}[H] 
+\centerline{\includegraphics[scale=0.75]{ImageGrapheIsomap}}
+\caption{Chaque point est relié à ses voisins}
+\end{figure}
+
+
+\noindent \underline{\'Etape 2} : \textit{calcul des distances géodésiques}\\ \\
+L'algorithme va calculer la distance géodésique $d_{G}(i,j)$ pour chaque paire de points $(x_{i},x_{j})$, d'après le graphe $G$, en appliquant un algorithme de recherche du chemin le plus court, comme par exemple l'algorithme \textbf{Dijkstra}.\\
+Cela permet ainsi de construire la matrice des distances géodésiques $D_{G}$.\\ \\ \\
+
+
+\noindent \underline{\'Etape 3} : \textit{réduction de dimension}\\ \\
+
+
+\subsubsection{Utilisation du module python sklearn}
+
+
+
+\section{Groupe 2}
+
+\subsection{LDA}
+
+\subsubsection{Principe}
+
+\subsubsection{Explication mathématique}
+
+\subsubsection{Utilisation du module python sklearn}
+
+
+
+\section{Groupe 3}
+
+\subsection{Random Forest}
+
+PARTIE REUNAN
+
+\subsubsection{Principe}
+
+\subsubsection{Explication mathématique}
+
+\subsubsection{Utilisation du module python sklearn}
+
+
+
+\section{Groupe 4}
+
+\subsection{Relief}
+
+PARTIE REUNAN
+
+\subsubsection{Principe}
+
+\subsubsection{Explication mathématique}
+
+\subsubsection{Utilisation du module python sklearn}
+
+
+\chapter{Réduction de dimension sur des données biologiques}
 
 \section{Expertise}
 
