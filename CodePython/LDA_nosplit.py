@@ -11,7 +11,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.linear_model import LogisticRegression
 
@@ -90,6 +89,19 @@ for j in ListeQuali:
     plt.show()
 
 
+
+labels = donnees.iloc[:, 0].values
+lda = LDA(n_components = 2)
+XterLDA = lda.fit(features,labels).transform(features)
+for groupe in range(int(min(labels)),int(max(labels))+1):
+    x = []
+    for i in range(len(features)):
+        if int(labels[i]) == groupe:
+            x.append(XterLDA[i][0])
+    plt.plot(x, len(x) * [1], "x")
+plt.title("LDA, " + "Bancs")
+plt.xlabel('LDA 1')
+plt.show()
 
 
 
